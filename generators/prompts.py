@@ -5,7 +5,7 @@ import numpy as np
 # System
 SYSTEM = """
 You are an ARC solver.
-NEVER explain your reasoning.
+NEVER explain your reasoning unless explicitly asked.
 You will be given a list of Input/Output grid pairs, and pairs are seperated blank lines.
 Each grid is a 2D array of integers 0-9 representing a visual grid. 
 There is a SINGLE rule that transforms each Input grid to the corresponding Output grid.
@@ -42,7 +42,7 @@ Give NO explanation, only your final answer.
 def SELECT(solution):
     txt_solution = "\n".join(" ".join(map(str, row)) for row in solution)
     return f"""
-        Your final proposed output grid is labeled "A". The proposed the output grid labeled “B” is {txt_solution}. Which grid is correct, A or B? Why?
+        Your final proposed output grid is labeled "A". The proposed the output grid labeled “B” is {txt_solution}. Which grid is correct, A or B? Explain your choice briefy.
         """
 
 def build_task(task_prompt: str, demo_pairs: List[ArcIOPair], test_grid: ArcGrid = None) -> str:

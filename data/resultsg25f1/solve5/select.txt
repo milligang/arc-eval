@@ -1,0 +1,48 @@
+B is correct.
+
+The rule is to duplicate each row of the input grid, and then for each duplicated row, expand each cell's value to occupy two columns. The first column of the pair takes the original value, and the second column takes the original value.
+
+Let's trace the last example:
+
+Input:
+[[2 0 0 7 8]
+ [2 1 1 0 0]
+ [0 5 6 6 0]
+ [3 5 6 0 0]
+ [0 5 0 0 0]]
+
+Row 1: [2 0 0 7 8] becomes [2 2 0 0 0 0 7 7 8 8]
+Row 2: [2 1 1 0 0] becomes [2 2 1 1 1 1 0 0 0 0]
+Row 3: [0 5 6 6 0] becomes [0 0 5 5 6 6 6 6 0 0]
+Row 4: [3 5 6 0 0] becomes [3 3 5 5 6 6 0 0 0 0]
+Row 5: [0 5 0 0 0] becomes [0 0 5 5 0 0 0 0 0 0]
+
+Then, each of these expanded rows is duplicated.
+
+Row 1 expanded: [2 2 0 0 0 0 7 7 8 8]
+Row 1 duplicated:
+[2 2 0 0 0 0 7 7 8 8]
+[2 2 0 0 0 0 7 7 8 8]
+
+Row 2 expanded: [2 2 1 1 1 1 0 0 0 0]
+Row 2 duplicated:
+[2 2 1 1 1 1 0 0 0 0]
+[2 2 1 1 1 1 0 0 0 0]
+
+Row 3 expanded: [0 0 5 5 6 6 6 6 0 0]
+Row 3 duplicated:
+[0 0 5 5 6 6 6 6 0 0]
+[0 0 5 5 6 6 6 6 0 0]
+
+Row 4 expanded: [3 3 5 5 6 6 0 0 0 0]
+Row 4 duplicated:
+[3 3 5 5 6 6 0 0 0 0]
+[3 3 5 5 6 6 0 0 0 0]
+
+Row 5 expanded: [0 0 5 5 0 0 0 0 0 0]
+Row 5 duplicated:
+[0 0 5 5 0 0 0 0 0 0]
+[0 0 5 5 0 0 0 0 0 0]
+
+Combining these gives grid B.
+

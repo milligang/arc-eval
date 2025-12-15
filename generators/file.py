@@ -54,11 +54,14 @@ def get_arcset(file_name: str):
     tasks = []
     with open(path, "r") as f:
         for line in f:
-            idx_str, uid = line.strip().split()
-            idx = int(idx_str)
-            task = train_problems[idx]
-            if task.uid != uid:
-                raise ValueError(f"UID mismatch for index {idx}: expected {uid}, got {task.uid}")
-            tasks.append(task)
+            tasks.append(get_arctask(line))
 
     return tasks
+
+def get_arctask(header: str):
+    idx_str, uid = header.strip().split()
+    idx = int(idx_str)
+    task = train_problems[idx]
+    if task.uid != uid:
+        raise ValueError(f"UID mismatch for index {idx}: expected {uid}, got {task.uid}")
+    return task

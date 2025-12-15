@@ -84,8 +84,8 @@ class RandomAgent(ArcAgent):
 
 
 class Gemini(ArcAgent):
-    def __init__(self, model: str):
-        api_key = os.getenv("GEMINI_API_KEY")
+    def __init__(self, model: str, key_name: str):
+        api_key = os.getenv(key_name)
         if api_key is None:
             raise ValueError("GEMINI_API_KEY not set in environment")
         self.client = genai.Client(api_key=api_key)
@@ -108,27 +108,32 @@ class Gemini(ArcAgent):
         self._init_chat(sys_prompt)
         outputs = []
         dir = save_results(self.model)
-        for tg in task.test_pairs:
-            predictions = []
-            msg = p.build_task(p.SOLVE, task.train_pairs, tg.x)
-            write_txt(dir, "in.txt", task.uid + ":\n" + msg)
+        tg = task.test_pairs[0]
+        predictions = []
+        msg = p.build_task(p.SOLVE, task.train_pairs, tg.x)
+        write_txt(dir, "in.txt", task.uid + ":\n" + msg)
 
-            # initial attempt
-            out = self.chat.send_message(msg)
+        # initial attempt
+        out = self.chat.send_message(msg)
+        grid = parse_grid(out.text)
+        predictions.append(grid)
+        write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
+
+        # try again if incorrect
+        for _ in range(MAX_ATTEMPTS - 1):
+            print("trying again")
+            if cmp_grids(grid, tg.y): break
+            out = self.chat.send_message(p.RETRY)
             grid = parse_grid(out.text)
             predictions.append(grid)
             write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
-
-            # try again if incorrect
-            for _ in range(MAX_ATTEMPTS - 1):
-                if cmp_grids(grid, tg.y): break
-                out = self.chat.send_message(p.RETRY)
-                grid = parse_grid(out.text)
-                predictions.append(grid)
-                write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
-            outputs.append(predictions)
+        print("predictions done")
+        outputs.append(predictions)
+        if cmp_grids(grid, tg.y):
+            write_txt(dir, "select.txt", "Skip")
+        else: 
             write_txt(dir, "select.txt", self._select(tg.y))
-            time.sleep(60)
+        print("selection done")
 
     def _select(self, solution):
         a_or_b = self.chat.send_message(p.SELECT(solution))
