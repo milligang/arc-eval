@@ -1,4 +1,5 @@
 from typing import List
+from dotenv import load_dotenv
 import os
 import re
 
@@ -6,12 +7,14 @@ import numpy as np
 from google import genai
 from google.genai import types
 
-from arc import ArcProblem, verify_is_arc_grid
-from arc.types import ArcIOPair, ArcGrid, ArcPrediction
+from arc import ArcProblem
+from arc.types import ArcIOPair, ArcGrid, ArcPrediction, verify_is_arc_grid
 from arc.agents import ArcAgent
 
 import prompts as p
 
+
+load_dotenv()
 MAX_ATTEMPTS = 3
 
 
@@ -22,8 +25,8 @@ def parse_grid(response) -> np.ndarray:
       - Python-style lists
       - Space-separated rows
     """
-    text = response.text.strip()
-
+    text = response.strip()
+    print("text:", text)
     # Try Python list syntax
     try:
         grid = eval(text, {"__builtins__": {}})
@@ -69,11 +72,13 @@ class RandomAgent(ArcAgent):
         """We are allowed to make up to 3 guesses per challange rules. """
         outputs = []
         for tg in test_grids:
+            a = p.build_task(p.SOLVE, demo_pairs, tg)
             out_shape = tg.shape
             out1 = np.random.randint(0, 9, out_shape)
             out2 = np.random.randint(0, 9, out_shape)
             out3 = np.random.randint(0, 9, out_shape)
             outputs.append([out1, out2, out3])
+        print(a)
         return outputs
 
 
@@ -90,12 +95,13 @@ class Gemini(ArcAgent):
         self.chat = self.client.chats.create(
             model=self.model,
             config=types.GenerateContentConfig(
-                system_instructions=sys_prompt,
                 thinking_config=types.ThinkingConfig(thinking_budget=0), # Disables thinking
-                temperature = 0.1,
+                temperature = 0,
                 max_output_tokens = 512
             )
         )
+        self.chat.send_message(sys_prompt)
+
 
     def solve(self, task: ArcProblem) -> List[ArcPrediction]:
         sys_prompt = p.SYSTEM + "\n" + p.GENERAL
@@ -107,13 +113,17 @@ class Gemini(ArcAgent):
 
             # initial attempt
             out = self.chat.send_message(msg)
-            predictions.append(parse_grid(out))
+            grid = parse_grid(out.text)
+            predictions.append(grid)
+            print(grid)
 
             # try again if incorrect
             for _ in range(MAX_ATTEMPTS - 1):
-                if cmp_grids(out, tg.y): break
+                if cmp_grids(grid, tg.y): break
                 out = self.chat.send_message(p.RETRY)
-                predictions.append(parse_grid(out))
+                grid = parse_grid(out.text)
+                predictions.append(grid)
+                print(grid)
 
             outputs.append(predictions)
 
