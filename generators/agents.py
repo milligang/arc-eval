@@ -12,6 +12,9 @@ from arc.types import ArcIOPair, ArcGrid, ArcPrediction, verify_is_arc_grid
 from arc.agents import ArcAgent
 
 import prompts as p
+from file import save_results, write_txt
+
+import time
 
 
 load_dotenv()
@@ -26,7 +29,6 @@ def parse_grid(response) -> np.ndarray:
       - Space-separated rows
     """
     text = response.strip()
-    print("text:", text)
     # Try Python list syntax
     try:
         grid = eval(text, {"__builtins__": {}})
@@ -78,7 +80,6 @@ class RandomAgent(ArcAgent):
             out2 = np.random.randint(0, 9, out_shape)
             out3 = np.random.randint(0, 9, out_shape)
             outputs.append([out1, out2, out3])
-        print(a)
         return outputs
 
 
@@ -97,7 +98,6 @@ class Gemini(ArcAgent):
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_budget=0), # Disables thinking
                 temperature = 0,
-                max_output_tokens = 512
             )
         )
         self.chat.send_message(sys_prompt)
@@ -107,15 +107,17 @@ class Gemini(ArcAgent):
         sys_prompt = p.SYSTEM + "\n" + p.GENERAL
         self._init_chat(sys_prompt)
         outputs = []
+        dir = save_results(self.model)
         for tg in task.test_pairs:
             predictions = []
             msg = p.build_task(p.SOLVE, task.train_pairs, tg.x)
+            write_txt(dir, "in.txt", task.uid + ":\n" + msg)
 
             # initial attempt
             out = self.chat.send_message(msg)
             grid = parse_grid(out.text)
             predictions.append(grid)
-            print(grid)
+            write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
 
             # try again if incorrect
             for _ in range(MAX_ATTEMPTS - 1):
@@ -123,19 +125,18 @@ class Gemini(ArcAgent):
                 out = self.chat.send_message(p.RETRY)
                 grid = parse_grid(out.text)
                 predictions.append(grid)
-                print(grid)
-
+                write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
             outputs.append(predictions)
-
-        return outputs
+            write_txt(dir, "select.txt", self._select(tg.y))
+            time.sleep(60)
 
     def _select(self, solution):
         a_or_b = self.chat.send_message(p.SELECT(solution))
-        return a_or_b
+        return a_or_b.text
 
     def _categorize_solved(self):
         cat = self.chat.send_message(p.CATEGORIZE_SOLVED)
-        return cat
+        return cat.text
 
     def categorize(self, demo_pairs: List[ArcIOPair]):
         return

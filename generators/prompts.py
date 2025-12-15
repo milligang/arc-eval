@@ -42,7 +42,7 @@ Give NO explanation, only your final answer.
 def SELECT(solution):
     txt_solution = "\n".join(" ".join(map(str, row)) for row in solution)
     return f"""
-        Your final proposed output grid is labeled "A". The proposed the output grid labeled “B” is {txt_solution}. Which grid is correct? Output ONLY one character: "A" or "B".
+        Your final proposed output grid is labeled "A". The proposed the output grid labeled “B” is {txt_solution}. Which grid is correct, A or B? Why?
         """
 
 def build_task(task_prompt: str, demo_pairs: List[ArcIOPair], test_grid: ArcGrid = None) -> str:
