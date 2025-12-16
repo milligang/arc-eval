@@ -152,7 +152,7 @@ class Gemini(ArcAgent):
         if cmp_grids(grid, tg.y):
             write_txt(self.dirc, "select.txt", "Skip")
         else: 
-            write_txt(self.dirc, "select.txt", self._select(tg.y))
+            write_txt(self.dirc, "select.txt", self._select_solved(tg.y))
         print("selection done")
 
     def correction(self, task: ArcProblem, percent: int):
@@ -169,7 +169,19 @@ class Gemini(ArcAgent):
 
         self.predict(msg, task.test_pairs[0])
 
-    def _select(self, solution):
+    def select(self, incorrect, task: ArcProblem):
+        self._init_chat()
+        self.dirc = save_results(self.model, "choose")
+        
+        test = task.test_pairs[0]
+        select_msg = p.SELECT_TWO(incorrect, test.y)
+        msg = p.SYSTEM + p.GENERAL + p.build_task(select_msg, task.train_pairs, test.x)
+        write_txt(self.dirc, "in.txt", (task.uid + msg))
+
+        a_or_b = self.chat.send_message(msg)
+        write_txt(self.dirc, "predict.txt", a_or_b.text)
+
+    def _select_solved(self, solution):
         a_or_b = self.chat.send_message(p.SELECT(solution))
         return a_or_b.text
 

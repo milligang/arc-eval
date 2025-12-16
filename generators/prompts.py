@@ -48,6 +48,13 @@ def SELECT(solution):
         Your final proposed output grid is labeled "A". The proposed the output grid labeled “B” is {txt_solution}. Which grid is correct, A or B? Explain your choice briefy.
         """
 
+def SELECT_TWO(incorrect, solution):
+    txt_incorrect = np.array2string(incorrect, separator=" ")
+    txt_solution = np.array2string(solution, separator=" ")
+    return f"""
+        For the final input, we have two possible outputs. Proposed output "A" is \n{txt_incorrect}\n Proposed output "B" is \n{txt_solution}\n Which grid is correct, A or B? Explain your choice briefy.
+        """
+
 def build_task(task_prompt: str, demo_pairs: List[ArcIOPair], test_grid: ArcGrid = None) -> str:
     lines = [] 
     for pair in demo_pairs:

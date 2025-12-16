@@ -72,9 +72,14 @@ def get_predictions(file: str, model: str):
     current_rows = []
     if model not in ["g25f0", "g25f1"]:
         raise ValueError("Model should be g25f0 or g25f1")
-    path = BASE_RESULTS + model + "/" + file + "/predict.txt"
+    path = BASE_RESULTS + model + "/" + file
+    input = path + "/in.txt"
+    output = path + "/predict.txt"
 
-    with open(path, "r") as f:
+    with open(input, "r") as f:
+        task_id = f.readline()
+
+    with open(output, "r") as f:
         for line in f:
             line = line.strip()
 
@@ -94,4 +99,4 @@ def get_predictions(file: str, model: str):
     if current_rows:
         grids.append(np.array(current_rows, dtype=int))
 
-    return grids
+    return task_id, grids

@@ -1,0 +1,4 @@
+The correct output is B.
+
+The rule is to fill the bounding box of each '2' object with '3's, but only if the bounding box contains at least one '3' already. If there are multiple '2' objects, this is done for each '2' object independently.
+

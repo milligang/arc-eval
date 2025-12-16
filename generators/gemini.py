@@ -1,11 +1,23 @@
-from file import get_arcset, save_rand_arcset
-from agents import Gemini
+from file import get_arcset, save_rand_arcset, get_arctask, get_predictions
+from agents import Gemini, cmp_grids
 import time
 
-tasks = get_arcset(save_rand_arcset(20))
+agent = Gemini("gemini-2.5-flash", "KEYK2")
+incorrect = get_predictions("solve3", "g25f0")[1][0]
+solution = get_arctask("75 6455b5f5")
+if not cmp_grids(incorrect, solution.test_pairs[0].y):
+    agent.select(incorrect, solution)
 
-agent = Gemini("gemini-2.5-flash-lite", "KEYK2")
-for task in tasks:
-    outs = agent.correction(task, 10)
-    time.sleep(60)
+def correct(p: int):
+    tasks = get_arcset(save_rand_arcset(10))
+    for task in tasks:
+        agent.correction(task, p)
+        time.sleep(60)
+
+def solve():
+    tasks = get_arcset(save_rand_arcset(10))
+    for task in tasks:
+        agent.solve(task)
+        time.sleep(60)
+
     

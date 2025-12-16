@@ -1,0 +1,4 @@
+The correct output is A.
+
+The rule is to take the input grid, duplicate it horizontally, and then stack this wider grid vertically three times, with a row of zeros inserted between each stacked grid.
+
