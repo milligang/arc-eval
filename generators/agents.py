@@ -67,11 +67,11 @@ def cmp_grids(grid_a: np.ndarray, grid_b: np.ndarray) -> bool:
 def corrupt_grid(grid: np.ArcGrid, percent: int) -> ArcGrid:
     h, w = grid.shape
     total = h * w
-    p = min(100, min(0, percent))
+    p = min(100, max(0, percent))
     num_corrupt = int((p / 100) * total)
 
-    corrupted = grid
-    random_indices = [(random.randint(0, w-1), random.randint(0, h-1)) for _ in range(num_corrupt)]
+    corrupted = grid.copy()
+    random_indices = [(random.randint(0, h-1), random.randint(0, w-1)) for _ in range(num_corrupt)]
     for (r, c) in random_indices:
         corrupted[r][c] = random.randint(1, 9)
 
@@ -158,7 +158,7 @@ class Gemini(ArcAgent):
 
     def correction(self, task: ArcProblem, percent: int):
         self._init_chat()
-        self.dirc = save_results(self.model, "1crtxn")
+        self.dirc = save_results(self.model, "10pcrtxn")
         tg = task.test_pairs[0]
         corrupted = corrupt_grid(tg.y, percent)
         
