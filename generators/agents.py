@@ -2,6 +2,7 @@ from typing import List
 from dotenv import load_dotenv
 import os
 import re
+import random
 
 import numpy as np
 from google import genai
@@ -13,8 +14,6 @@ from arc.agents import ArcAgent
 
 import prompts as p
 from file import save_results, write_txt
-
-import time
 
 
 load_dotenv()
@@ -65,6 +64,20 @@ def cmp_grids(grid_a: np.ndarray, grid_b: np.ndarray) -> bool:
     return grid_a.shape == grid_b.shape and np.all(grid_a == grid_b)
 
 
+def corrupt_grid(grid: np.ArcGrid, percent: int) -> ArcGrid:
+    h, w = grid.shape
+    total = h * w
+    p = min(100, min(0, percent))
+    num_corrupt = int((p / 100) * total)
+
+    corrupted = grid
+    random_indices = [(random.randint(0, w-1), random.randint(0, h-1)) for _ in range(num_corrupt)]
+    for (r, c) in random_indices:
+        corrupted[r][c] = random.randint(1, 9)
+
+    verify_is_arc_grid(corrupted)
+    return corrupted
+
 class RandomAgent(ArcAgent):
     """Makes random predicitons. Low chance of success. """
 
@@ -92,7 +105,7 @@ class Gemini(ArcAgent):
         self.chat = None
         self.model = model
 
-    def _init_chat(self, sys_prompt: str) -> None:
+    def _init_chat(self) -> None:
         self.chat = self.client.chats.create(
             model=self.model,
             config=types.GenerateContentConfig(
@@ -100,16 +113,19 @@ class Gemini(ArcAgent):
                 temperature = 0,
             )
         )
+
+
+    def solve(self, task: ArcProblem):
+        # start new chat
+        self._init_chat()
+        sys_prompt = p.SYSTEM + "\n" + p.GENERAL
         self.chat.send_message(sys_prompt)
 
-
-    def solve(self, task: ArcProblem) -> List[ArcPrediction]:
-        sys_prompt = p.SYSTEM + "\n" + p.GENERAL
-        self._init_chat(sys_prompt)
         outputs = []
-        dir = save_results(self.model)
-        tg = task.test_pairs[0]
         predictions = []
+        dir = save_results(self.model, "solve")
+        # only handle first test case (very few have more than 1 anyways)
+        tg = task.test_pairs[0]
         msg = p.build_task(p.SOLVE, task.train_pairs, tg.x)
         write_txt(dir, "in.txt", task.uid + ":\n" + msg)
 
@@ -129,11 +145,29 @@ class Gemini(ArcAgent):
             write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
         print("predictions done")
         outputs.append(predictions)
+        
+        # If incorrect, see if model can recognize a correct solution
         if cmp_grids(grid, tg.y):
             write_txt(dir, "select.txt", "Skip")
         else: 
             write_txt(dir, "select.txt", self._select(tg.y))
         print("selection done")
+
+    def correction(self, task: ArcProblem, percent: int):
+        self._init_chat()
+        dir = save_results(self.model, "crtxn")
+        tg = task.test_pairs[0]
+        corrupted = corrupt_grid(tg.y, percent)
+        
+        sys_prompt = p.SYSTEM + p.GENERAL
+        msg = p.build_task(p.CORRECTION, task.train_pairs, tg.x)
+        incorrect = "\n".join(" ".join(map(str, row)) for row in corrupted)
+        input = "\n".join([sys_prompt, msg, incorrect])
+
+        write_txt(dir, "in.txt", (task.uid + input))
+        out = self.chat.send_message(input)
+        write_txt(dir, "out.txt", (out))
+
 
     def _select(self, solution):
         a_or_b = self.chat.send_message(p.SELECT(solution))

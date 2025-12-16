@@ -1,0 +1,2 @@
+B is correct. The rule is to fill in the gaps between the 8s with 3s, but only if there are at least two 8s with a gap of 3 or fewer cells between them.
+

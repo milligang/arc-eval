@@ -1,0 +1,2 @@
+B is correct. The rule is to fill the interior of the largest shape with the color 4. The largest shape is the one made of 2s. The output grid B correctly fills the interior of the shape made of 2s with 4s. Grid A incorrectly fills only a small portion of the interior.
+

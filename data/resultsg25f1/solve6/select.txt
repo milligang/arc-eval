@@ -1,0 +1,2 @@
+B is correct. The rule is to replace the non-zero elements with a count of how many times that specific non-zero digit appears in the input grid.
+

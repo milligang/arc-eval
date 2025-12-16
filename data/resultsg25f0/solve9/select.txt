@@ -1,0 +1,2 @@
+B is correct. The rule is to draw horizontal and vertical lines of the color 8 to connect all existing 8s in the grid.
+

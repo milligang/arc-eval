@@ -19,7 +19,7 @@ def next_dir(base_dir: str, prefix: str):
     name = f"{prefix}{k}"
     return os.path.join(base_dir, name), name
 
-def save_results(model: str):
+def save_results(model: str, eval: str):
     dir = BASE_RESULTS
     if model == "gemini-2.5-flash":
         dir += "g25f0"
@@ -27,7 +27,7 @@ def save_results(model: str):
         dir += "g25f1"
     else:
         return None
-    run_dir, _ = next_dir(dir, "solve")
+    run_dir, _ = next_dir(dir, eval)
     os.makedirs(run_dir)
     return run_dir
 

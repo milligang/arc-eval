@@ -32,11 +32,14 @@ Incorrect, try again. Give NO explanation, only your final answer.
 CATEGORIZE = """
 Select the SINGLE category from the list that best fits the transformation rule. Give NO explanation, only your final answer.
 """
-
 CATEGORIZE_SOLVED = """
 Select the SINGLE category that best fits the transformation rule. 
 The category must be from this list: [”AboveBelow”, “Center”, “CleanUp”, “CompleteShape”, “Copy”, “Count”, “ExtendToBoundary”, “ExtractObjects”, “FilledNotFilled”, “HorizontalVertical”, “InsideOutside”, “MoveToBoundary”, “Order”, “SameDifferent”, “TopBottom2D”, “TopBottom3D”].
 Give NO explanation, only your final answer.
+"""
+CORRECTION = """
+We have attempted to generate an Output grid that corresponds to the last given Input grid, as shown below.
+Return the correct Output grid by altering the one we provide below. It may already be correct. Give NO explanation.
 """
 
 def SELECT(solution):

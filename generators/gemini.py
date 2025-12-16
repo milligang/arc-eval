@@ -1,8 +1,8 @@
-from file import get_arctask
+from file import get_arctask, save_rand_arcset
 from agents import Gemini
 
-task = get_arctask("308 c59eb873")
+task = get_arctask("arcset1")
 
-agent = Gemini("gemini-2.5-flash-lite", "KEYC0")
-outs = agent.solve(task)
+agent = Gemini("gemini-2.5-flash-lite", "KEYK1")
+outs = agent.correction(task, 10)
     
