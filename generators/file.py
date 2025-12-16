@@ -1,6 +1,7 @@
 import os
 import random
 from arc import train_problems
+import numpy as np
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # repo root
 BASE_RESULTS = os.path.join(BASE_DIR, "data", "results")
@@ -65,3 +66,32 @@ def get_arctask(header: str):
     if task.uid != uid:
         raise ValueError(f"UID mismatch for index {idx}: expected {uid}, got {task.uid}")
     return task
+
+def get_predictions(file: str, model: str):
+    grids = []
+    current_rows = []
+    if model not in ["g25f0", "g25f1"]:
+        raise ValueError("Model should be g25f0 or g25f1")
+    path = BASE_RESULTS + model + "/" + file + "/predict.txt"
+
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+
+            # Blank line = end of current grid
+            if not line:
+                if current_rows:
+                    grids.append(np.array(current_rows, dtype=int))
+                    current_rows = []
+                continue
+
+            # Parse a row [0 4 0 3 0 4 ...]
+            line = line.strip("[]")
+            nums = [int(x) for x in line.split()]
+            current_rows.append(nums)
+
+    # Catch last grid if file doesn't end with blank line
+    if current_rows:
+        grids.append(np.array(current_rows, dtype=int))
+
+    return grids

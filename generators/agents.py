@@ -104,6 +104,7 @@ class Gemini(ArcAgent):
         self.client = genai.Client(api_key=api_key)
         self.chat = None
         self.model = model
+        self.dirc = ""
 
     def _init_chat(self) -> None:
         self.chat = self.client.chats.create(
@@ -114,60 +115,59 @@ class Gemini(ArcAgent):
             )
         )
 
+    def predict(self, msg: str, task: ArcProblem):
+        predictions = []
+        # initial attempt
+        out = self.chat.send_message(msg)
+        grid = parse_grid(out.text)
+        predictions.append(grid)
+        write_txt(self.dirc, "predict.txt", np.array2string(grid, separator=" "))
 
+        # try again if incorrect
+        for _ in range(MAX_ATTEMPTS - 1):
+            print("trying again")
+            if cmp_grids(grid, task.y): break
+            out = self.chat.send_message(p.RETRY)
+            grid = parse_grid(out.text)
+            predictions.append(grid)
+            write_txt(self.dirc, "predict.txt", np.array2string(grid, separator=" "))
+        print("predictions done")
+        return grid
+    
     def solve(self, task: ArcProblem):
         # start new chat
         self._init_chat()
         sys_prompt = p.SYSTEM + "\n" + p.GENERAL
         self.chat.send_message(sys_prompt)
 
-        outputs = []
-        predictions = []
-        dir = save_results(self.model, "solve")
+        self.dirc = save_results(self.model, "solve")
         # only handle first test case (very few have more than 1 anyways)
         tg = task.test_pairs[0]
         msg = p.build_task(p.SOLVE, task.train_pairs, tg.x)
-        write_txt(dir, "in.txt", task.uid + ":\n" + msg)
+        write_txt(self.dirc, "in.txt", task.uid + ":\n" + msg)
 
-        # initial attempt
-        out = self.chat.send_message(msg)
-        grid = parse_grid(out.text)
-        predictions.append(grid)
-        write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
-
-        # try again if incorrect
-        for _ in range(MAX_ATTEMPTS - 1):
-            print("trying again")
-            if cmp_grids(grid, tg.y): break
-            out = self.chat.send_message(p.RETRY)
-            grid = parse_grid(out.text)
-            predictions.append(grid)
-            write_txt(dir, "predict.txt", np.array2string(grid, separator=" "))
-        print("predictions done")
-        outputs.append(predictions)
+        grid = self.predict(msg, tg)
         
         # If incorrect, see if model can recognize a correct solution
         if cmp_grids(grid, tg.y):
-            write_txt(dir, "select.txt", "Skip")
+            write_txt(self.dirc, "select.txt", "Skip")
         else: 
-            write_txt(dir, "select.txt", self._select(tg.y))
+            write_txt(self.dirc, "select.txt", self._select(tg.y))
         print("selection done")
 
     def correction(self, task: ArcProblem, percent: int):
         self._init_chat()
-        dir = save_results(self.model, "crtxn")
+        self.dirc = save_results(self.model, "crtxn")
         tg = task.test_pairs[0]
         corrupted = corrupt_grid(tg.y, percent)
         
         sys_prompt = p.SYSTEM + p.GENERAL
         msg = p.build_task(p.CORRECTION, task.train_pairs, tg.x)
         incorrect = "\n".join(" ".join(map(str, row)) for row in corrupted)
-        input = "\n".join([sys_prompt, msg, incorrect])
+        msg = "\n".join([sys_prompt, msg, incorrect])
+        write_txt(self.dirc, "in.txt", (task.uid + msg))
 
-        write_txt(dir, "in.txt", (task.uid + input))
-        out = self.chat.send_message(input)
-        write_txt(dir, "out.txt", (out))
-
+        self.predict(msg, task.test_pairs[0])
 
     def _select(self, solution):
         a_or_b = self.chat.send_message(p.SELECT(solution))
