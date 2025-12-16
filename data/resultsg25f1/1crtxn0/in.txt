@@ -1,0 +1,79 @@
+cf98881b
+You are an ARC solver.
+NEVER explain your reasoning unless explicitly asked.
+You will be given a list of Input/Output grid pairs, and pairs are seperated blank lines.
+Each grid is a 2D array of integers 0-9 representing a visual grid. 
+There is a SINGLE rule that transforms each Input grid to the corresponding Output grid.
+
+The rule may involve counting or sorting objects (e.g. sorting by size), comparing numbers (e.g. which shape or symbol appears the most? Which is the largest object? Which objects are the same size?), or repeating a pattern for a fixed number of time.
+
+Input:
+[[0 4 0 4 2 9 9 0 0 2 0 0 0 0]
+ [0 4 0 0 2 0 0 9 9 2 0 1 0 0]
+ [4 0 0 0 2 0 0 0 0 2 1 1 1 0]
+ [4 4 4 4 2 9 0 9 0 2 1 1 0 1]]
+Output:
+[[9 4 0 4]
+ [0 4 9 9]
+ [4 1 1 0]
+ [4 4 4 4]]
+
+Input:
+[[4 4 4 4 2 9 0 9 0 2 0 0 0 1]
+ [4 4 0 0 2 9 9 0 0 2 1 0 0 0]
+ [4 0 4 4 2 0 0 0 9 2 0 1 0 1]
+ [0 0 0 0 2 0 0 9 0 2 1 0 1 0]]
+Output:
+[[4 4 4 4]
+ [4 4 0 0]
+ [4 1 4 4]
+ [1 0 9 0]]
+
+Input:
+[[4 4 4 0 2 9 9 0 9 2 0 1 0 1]
+ [0 4 0 4 2 0 0 9 0 2 0 1 0 0]
+ [0 4 0 4 2 0 0 9 9 2 1 0 0 1]
+ [4 0 4 4 2 9 9 9 0 2 0 0 0 1]]
+Output:
+[[4 4 4 9]
+ [0 4 9 4]
+ [1 4 9 4]
+ [4 9 4 4]]
+
+Input:
+[[0 0 0 4 2 0 0 0 9 2 0 0 0 0]
+ [4 4 0 4 2 9 0 9 0 2 0 0 0 0]
+ [4 0 4 4 2 0 9 9 0 2 1 1 0 1]
+ [0 4 4 4 2 0 9 0 0 2 1 1 1 1]]
+Output:
+[[0 0 0 4]
+ [4 4 9 4]
+ [4 9 4 4]
+ [1 4 4 4]]
+
+Input:
+[[4 0 4 0 2 0 0 0 0 2 0 0 0 1]
+ [4 4 4 4 2 0 0 0 9 2 1 1 0 0]
+ [0 4 4 4 2 0 9 9 0 2 1 1 0 1]
+ [0 4 4 0 2 0 0 9 0 2 0 1 0 1]]
+Output:
+[[4 0 4 1]
+ [4 4 4 4]
+ [1 4 4 4]
+ [0 4 4 1]]
+
+Input:
+[[0 0 4 0 2 9 0 9 0 2 1 1 0 0]
+ [4 4 0 4 2 9 9 9 0 2 1 1 1 0]
+ [0 0 0 0 2 0 9 9 9 2 1 1 0 1]
+ [0 4 4 0 2 9 0 9 9 2 1 0 0 0]]
+Output: ?
+
+We have attempted to generate an Output grid that corresponds to the last given Input grid.
+Return the correct Output grid by altering the one we provide below. It may already be correct. Give NO explanation.
+
+9 1 4 0
+4 4 9 4
+1 9 9 9
+9 4 4 9
+

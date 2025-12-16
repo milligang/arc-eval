@@ -1,2 +1,0 @@
-B is correct. The rule is to draw horizontal and vertical lines of the color 8, connecting all existing 8s in the input grid.
-
