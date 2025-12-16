@@ -139,6 +139,7 @@ class Gemini(ArcAgent):
         self._init_chat()
         sys_prompt = p.SYSTEM + "\n" + p.GENERAL
         self.chat.send_message(sys_prompt)
+        print("chat initialized")
 
         self.dirc = save_results(self.model, "solve")
         # only handle first test case (very few have more than 1 anyways)
@@ -157,7 +158,7 @@ class Gemini(ArcAgent):
 
     def correction(self, task: ArcProblem, percent: int):
         self._init_chat()
-        self.dirc = save_results(self.model, "crtxn")
+        self.dirc = save_results(self.model, "1crtxn")
         tg = task.test_pairs[0]
         corrupted = corrupt_grid(tg.y, percent)
         

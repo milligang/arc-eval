@@ -1,6 +1,7 @@
 import os
 import random
-from arc import train_problems
+from typing import List
+from arc import train_problems, ArcIOPair
 import numpy as np
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # repo root
@@ -68,7 +69,7 @@ def get_arctask(header: str):
     return task
 
 def get_predictions(file: str, model: str):
-    grids = []
+    grids : List[ArcIOPair] = []
     current_rows = []
     if model not in ["g25f0", "g25f1"]:
         raise ValueError("Model should be g25f0 or g25f1")
@@ -77,7 +78,8 @@ def get_predictions(file: str, model: str):
     output = path + "/predict.txt"
 
     with open(input, "r") as f:
-        task_id = f.readline()
+        task_id_raw = f.readline()
+        task_id = ''.join(filter(str.isalnum, task_id_raw))
 
     with open(output, "r") as f:
         for line in f:
@@ -100,3 +102,17 @@ def get_predictions(file: str, model: str):
         grids.append(np.array(current_rows, dtype=int))
 
     return task_id, grids
+
+def find_line_by_uid(uid: str) -> str:
+    path = BASE_TASKS + "/alltasks.txt"
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            _, line_uid = line.split(maxsplit=1)
+            if line_uid == uid:
+                return line
+
+    return None
